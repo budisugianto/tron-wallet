@@ -5,6 +5,10 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"math/big"
+	"strconv"
+	"strings"
+
 	"github.com/budisugianto/tron-wallet/enums"
 	"github.com/budisugianto/tron-wallet/grpcClient"
 	"github.com/budisugianto/tron-wallet/util"
@@ -12,9 +16,6 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/tyler-smith/go-bip32"
 	"github.com/tyler-smith/go-bip39"
-	"math/big"
-	"strconv"
-	"strings"
 )
 
 type TronWallet struct {
@@ -288,7 +289,16 @@ func (t *TronWallet) TransferTRC20(token *Token, toAddressBase58 string, amountI
 	return hexutil.Encode(tx.GetTxid())[2:], nil
 }
 
-func (t *TronWallet) EstimateTransferTRC20Fee() (int64, error) {
+// func (t *TronWallet) EstimateTransferTRC20Fee() (int64, error) {
 
-	return estimateTrc20TransactionFee()
+//		return estimateTrc20TransactionFee()
+//	}
+func (t *TronWallet) EstimateTransferTRC20Fee(token *Token, toAddressBase58 string, amountInSun int64) (int64, error) {
+
+	privateKey, err := t.PrivateKeyRCDSA()
+	if err != nil {
+		return 0, err
+	}
+
+	return estimateTrc20TransactionFee(t.Node, privateKey, t.AddressBase58, token, toAddressBase58, amountInSun)
 }
