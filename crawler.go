@@ -3,18 +3,16 @@ package tronWallet
 import (
 	"errors"
 	"fmt"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/budisugianto/tron-wallet/enums"
 	"github.com/budisugianto/tron-wallet/grpcClient"
 	"github.com/budisugianto/tron-wallet/grpcClient/proto/api"
 	"github.com/budisugianto/tron-wallet/grpcClient/proto/core"
 	"github.com/budisugianto/tron-wallet/util"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"strings"
-	"sync"
-	"time"
-)
-
-import (
 	"github.com/golang/protobuf/proto"
 )
 
@@ -55,9 +53,6 @@ func (c *Crawler) ScanBlocks(count int) ([]CrawlResult, error) {
 
 	// check block for transaction
 	allTransactions = append(allTransactions, c.extractOurTransactionsFromBlock(block, 0))
-	if err != nil {
-		return nil, err
-	}
 
 	currentBlock := block.BlockHeader.RawData.Number
 	blockNumber := block.BlockHeader.RawData.Number
@@ -184,13 +179,13 @@ func (c *Crawler) prepareTrxTransaction(t *api.TransactionExtention, contract *c
 
 	// if address is hex convert to base58
 	toAddress := hexutil.Encode(contract.ToAddress)[2:]
-	if strings.HasPrefix(toAddress, "41") == true {
+	if strings.HasPrefix(toAddress, "41") {
 		toAddress = util.HexToAddress(toAddress).String()
 	}
 
 	// if address is hex convert to base58
 	fromAddress := hexutil.Encode(contract.OwnerAddress)[2:]
-	if strings.HasPrefix(fromAddress, "41") == true {
+	if strings.HasPrefix(fromAddress, "41") {
 		fromAddress = util.HexToAddress(fromAddress).String()
 	}
 
@@ -207,25 +202,25 @@ func (c *Crawler) prepareTrc20Transaction(t *api.TransactionExtention, contract 
 
 	tokenTransferData, validTokenData := util.ParseTrc20TokenTransfer(util.ToHex(contract.Data)[2:])
 
-	if validTokenData == false {
+	if !validTokenData {
 		return nil
 	}
 
 	// if contractAddress is hex convert to base58
 	contractAddress := hexutil.Encode(contract.ContractAddress)[2:]
-	if strings.HasPrefix(contractAddress, "41") == true {
+	if strings.HasPrefix(contractAddress, "41") {
 		contractAddress = util.HexToAddress(contractAddress).String()
 	}
 
 	// if address is hex convert to base58
 	toAddress := tokenTransferData.To
-	if strings.HasPrefix(toAddress, "41") == true {
+	if strings.HasPrefix(toAddress, "41") {
 		toAddress = util.HexToAddress(toAddress).String()
 	}
 
 	// if address is hex convert to base58
 	fromAddress := hexutil.Encode(contract.OwnerAddress)[2:]
-	if strings.HasPrefix(fromAddress, "41") == true {
+	if strings.HasPrefix(fromAddress, "41") {
 		fromAddress = util.HexToAddress(fromAddress).String()
 	}
 

@@ -78,7 +78,7 @@ func broadcastTransaction(node enums.Node, transaction *api.TransactionExtention
 		return err
 	}
 
-	if res.Result != true {
+	if !res.Result {
 		return errors.New(res.Code.String())
 	}
 
