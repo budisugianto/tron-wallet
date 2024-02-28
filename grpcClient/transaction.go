@@ -1,7 +1,9 @@
 package grpcClient
 
 import (
+	"encoding/hex"
 	"fmt"
+
 	"github.com/budisugianto/tron-wallet/grpcClient/proto/api"
 	"github.com/budisugianto/tron-wallet/grpcClient/proto/core"
 	"github.com/budisugianto/tron-wallet/util"
@@ -48,6 +50,22 @@ func (g *GrpcClient) Broadcast(tx *core.Transaction) (*api.Return, error) {
 	}
 	if result.GetCode() != api.Return_SUCCESS {
 		return result, fmt.Errorf("result error(%s): %s", result.GetCode(), result.GetMessage())
+	}
+	return result, nil
+}
+
+func (g *GrpcClient) TrxStatus(txid string) (*core.TransactionInfo, error) {
+	var err error
+
+	tx := &api.BytesMessage{}
+	if tx.Value, err = hex.DecodeString(txid); err != nil {
+		return nil, err
+	}
+	ctx, cancel := g.getContext()
+	defer cancel()
+	result, err := g.Client.GetTransactionInfoById(ctx, tx)
+	if err != nil {
+		return nil, err
 	}
 	return result, nil
 }

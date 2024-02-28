@@ -84,3 +84,16 @@ func broadcastTransaction(node enums.Node, transaction *api.TransactionExtention
 
 	return nil
 }
+
+func TrxStatus(txid string) (int64, error) {
+	c, _ := grpcClient.GetGrpcClient(enums.MAIN_NODE)
+	x, _ := c.GetNowBlock()
+	result, err := c.TrxStatus(txid)
+	if err != nil {
+		return 0, err
+	}
+	if result.BlockNumber == 0 {
+		return 0, errors.New("no Trx found")
+	}
+	return x.BlockHeader.RawData.Number - result.BlockNumber, nil
+}
