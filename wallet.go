@@ -293,3 +293,18 @@ func (t *TronWallet) EstimateTransferTRC20Fee() (int64, error) {
 
 	return estimateTrc20TransactionFee()
 }
+
+func (t *TronWallet) GetAccountResource() (bandwidth int64, energy int64, err error) {
+
+	c, err := grpcClient.GetGrpcClient(t.Node)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	b, err := c.GetAccountResource(t.AddressBase58)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return b.NetLimit + b.FreeNetLimit - b.NetUsed - b.FreeNetUsed, b.EnergyLimit - b.EnergyUsed, nil
+}
